@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de piste - Enigme 1</title>
+    <style>
+        /* Styles pour la page blanche et le texte */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white; /* Le fond de la page est blanc */
+            font-family: Arial, sans-serif;
+            font-size: 3em;
+            color: black;
+            position: relative; /* Indispensable pour positionner l'énigme */
+        }
+
+        /* Styles pour l'élément caché (le pixel) */
+        .pixel-cache {
+            /* Positionnement et taille du pixel */
+            position: absolute; /* Permet de le placer n'importe où sur la page */
+            top: 95%; /* Distance du haut de la page (en bas) */
+            left: 5%; /* Distance de la gauche de la page (coin inférieur gauche) */
+            width: 8px; /* Taille du pixel */
+            height: 8px; /* Taille du pixel */
+            
+            /* Rendu visuel du pixel */
+            background-color: transparent; /* Rend le pixel invisible */
+            cursor: pointer; /* Change le curseur en une main au survol */
+        }
+    </style>
+</head>
+<body>
+
+    Trouve-moi
+
+    <a href="enigme-2.html" class="pixel-cache" title="Regarde plus attentivement…"></a>
+
+</body>
+</html>
