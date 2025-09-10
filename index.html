@@ -17,25 +17,21 @@
             font-family: Arial, sans-serif;
             font-size: 3em;
             color: black;
-            position: relative; /* Indispensable pour positionner l'énigme */
+            position: relative; /* Indispensable pour positionner les éléments */
         }
 
-        /* Styles pour l'élément caché (le pixel) */
+        /* Styles pour les éléments cachés (les pixels) */
         .pixel-cache {
-            /* Positionnement et taille du pixel */
-            position: absolute; /* Permet de le placer n'importe où sur la page */
-            top: 95%; /* Distance du haut de la page (en bas) */
-            left: 5%; /* Distance de la gauche de la page (coin inférieur gauche) */
-            width: 800px; /* Taille du pixel */
-            height: 800px; /* Taille du pixel */
-            
             /* Rendu visuel du pixel */
             background-color: transparent; /* Rend le pixel invisible */
             cursor: pointer; /* Change le curseur en une main au survol */
             transition: background-color 0.3s ease; /* Ajoute une transition pour un effet plus doux */
+            position: absolute; /* Permet de le placer n'importe où sur la page */
+            width: 30px; /* Taille des pixels */
+            height: 30px; /* Taille des pixels */
         }
         
-        /* C'est ici que l'effet de survol est ajouté ! */
+        /* Effet de survol */
         .pixel-cache:hover {
             background-color: rgba(0, 0, 0, 0.2); /* Rends le pixel semi-transparent au survol */
         }
@@ -45,7 +41,14 @@
 
     Trouve-moi
 
-    <a href="enigme-2.html" class="pixel-cache" title="Regarde plus attentivement…"></a>
+    <a href="enigme-2.html" class="pixel-cache" title="Le bon pixel !" style="top: 80%; left: 20%;"></a>
 
+    <a href="#" class="pixel-cache" title="Faux pixel" style="top: 10%; left: 90%;"></a>
+    <a href="#" class="pixel-cache" title="Faux pixel" style="top: 25%; left: 35%;"></a>
+    <a href="#" class="pixel-cache" title="Faux pixel" style="top: 40%; left: 70%;"></a>
+    <a href="#" class="pixel-cache" title="Faux pixel" style="top: 60%; left: 10%;"></a>
+    <a href="#" class="pixel-cache" title="Faux pixel" style="top: 75%; left: 60%;"></a>
+    <a href="#" class="pixel-cache" title="Faux pixel" style="top: 50%; left: 50%;"></a>
+    
 </body>
 </html>
