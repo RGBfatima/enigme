@@ -32,6 +32,12 @@
             /* Rendu visuel du pixel */
             background-color: transparent; /* Rend le pixel invisible */
             cursor: pointer; /* Change le curseur en une main au survol */
+            transition: background-color 0.3s ease; /* Ajoute une transition pour un effet plus doux */
+        }
+        
+        /* C'est ici que l'effet de survol est ajouté ! */
+        .pixel-cache:hover {
+            background-color: rgba(0, 0, 0, 0.2); /* Rends le pixel semi-transparent au survol */
         }
     </style>
 </head>
