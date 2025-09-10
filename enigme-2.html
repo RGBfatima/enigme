@@ -4,29 +4,140 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jeu de piste - Enigme 2</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .puzzle-container {
+            width: 600px;
+            height: 400px;
+            margin: 50px auto;
+            display: flex;
+            flex-wrap: wrap;
+            border: 2px solid #333;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .puzzle-piece {
+            width: 200px;
+            height: 200px;
+            /* Remplacez l'URL ci-dessous par le chemin de votre image. */
+            background-image: url('https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.voici.fr%2Fbios-people%2Fevelyne-thomas%2Fdiaporama&psig=AOvVaw05SuPmT_g0w0tnZdXmo4Kx&ust=1757602076296000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCMjxmY64zo8DFQAAAAAdAAAAABAE');
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            cursor: grab;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .puzzle-piece:active {
+            cursor: grabbing;
+        }
+        
+        .puzzle-piece[data-order="1"] { background-position: 0 0; }
+        .puzzle-piece[data-order="2"] { background-position: -200px 0; }
+        .puzzle-piece[data-order="3"] { background-position: -400px 0; }
+        .puzzle-piece[data-order="4"] { background-position: 0 -200px; }
+        .puzzle-piece[data-order="5"] { background-position: -200px -200px; }
+        .puzzle-piece[data-order="6"] { background-position: -400px -200px; }
+
+        #next-step {
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: green;
+        }
+
+        #next-step a {
+            color: #007BFF;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
     <h1>Étape 2 : L'image secrète</h1>
-    <p>
-        Réorganisez les pièces de l'image pour révéler la prochaine étape.
-    </p>
+    <p>Réorganisez les pièces de l'image pour révéler la prochaine étape.</p>
 
-    <div class="puzzle-container" id="puzzle-container">
-        <div class="puzzle-piece" data-order="1"></div>
-        <div class="puzzle-piece" data-order="2"></div>
-        <div class="puzzle-piece" data-order="3"></div>
-        <div class="puzzle-piece" data-order="4"></div>
-        <div class="puzzle-piece" data-order="5"></div>
-        <div class="puzzle-piece" data-order="6"></div>
-        </div>
+    <div class="puzzle-container" id="puzzle-container" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <div class="puzzle-piece" data-order="1" draggable="true" ondragstart="drag(event)"></div>
+        <div class="puzzle-piece" data-order="2" draggable="true" ondragstart="drag(event)"></div>
+        <div class="puzzle-piece" data-order="3" draggable="true" ondragstart="drag(event)"></div>
+        <div class="puzzle-piece" data-order="4" draggable="true" ondragstart="drag(event)"></div>
+        <div class="puzzle-piece" data-order="5" draggable="true" ondragstart="drag(event)"></div>
+        <div class="puzzle-piece" data-order="6" draggable="true" ondragstart="drag(event)"></div>
+    </div>
 
     <div id="next-step" style="display:none;">
         <p>Bravo ! Vous avez résolu l'énigme. Cliquez ici pour la suite :</p>
-        <a href="URL_DE_LA_PROCHAINE_PAGE">Prochaine Étape</a>
+        <a id="next-link" href="URL_DE_LA_PROCHAINE_PAGE">Prochaine Étape</a>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        const puzzleContainer = document.getElementById('puzzle-container');
+        const nextStepDiv = document.getElementById('next-step');
+        const pieces = Array.from(document.querySelectorAll('.puzzle-piece'));
+
+        function shufflePieces() {
+            pieces.sort(() => Math.random() - 0.5);
+            pieces.forEach(piece => puzzleContainer.appendChild(piece));
+        }
+
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        function drag(event) {
+            event.dataTransfer.setData("text", event.target.getAttribute('data-order'));
+            event.dataTransfer.effectAllowed = 'move';
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            const data = event.dataTransfer.getData("text");
+            const draggedElement = document.querySelector('[data-order="'+data+'"]');
+            const targetElement = event.target.closest('.puzzle-piece');
+
+            if (targetElement && targetElement !== draggedElement) {
+                const temp = document.createElement('div');
+                puzzleContainer.insertBefore(temp, targetElement);
+                puzzleContainer.insertBefore(targetElement, draggedElement);
+                puzzleContainer.insertBefore(draggedElement, temp);
+                puzzleContainer.removeChild(temp);
+                checkWinCondition();
+            }
+        }
+
+        function checkWinCondition() {
+            const currentOrder = Array.from(puzzleContainer.children).map(piece => piece.getAttribute('data-order'));
+            const correctOrder = ['1', '2', '3', '4', '5', '6'];
+
+            let isCorrect = true;
+            for (let i = 0; i < currentOrder.length; i++) {
+                if (currentOrder[i] !== correctOrder[i]) {
+                    isCorrect = false;
+                    break;
+                }
+            }
+
+            if (isCorrect) {
+                nextStepDiv.style.display = 'block';
+                puzzleContainer.style.border = "5px solid green";
+                puzzleContainer.removeEventListener('dragstart', drag);
+                puzzleContainer.removeEventListener('drop', drop);
+            }
+        }
+
+        shufflePieces();
+
+    </script>
 </body>
 </html>
