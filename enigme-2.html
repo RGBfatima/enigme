@@ -27,8 +27,8 @@
         }
 
         .puzzle-container {
-            width: 500px; /* Largeur du puzzle (5 pièces x 100px) */
-            height: 500px; /* Hauteur du puzzle (5 pièces x 100px) */
+            width: 500px;
+            height: 500px;
             display: flex;
             flex-wrap: wrap;
             border: 2px solid #333;
@@ -36,8 +36,8 @@
         }
 
         .reference-image-container {
-            width: 250px; /* Moitié de la largeur du puzzle */
-            height: 250px; /* Moitié de la hauteur du puzzle */
+            width: 250px;
+            height: 250px;
             border: 2px solid #333;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
@@ -49,8 +49,8 @@
         }
 
         .puzzle-piece {
-            width: 100px; /* Taille d'une pièce */
-            height: 100px; /* Taille d'une pièce */
+            width: 100px;
+            height: 100px;
             background-image: url('puzzlee.jpg');
             border: 1px solid #ccc;
             box-sizing: border-box;
@@ -73,6 +73,30 @@
             text-decoration: none;
             font-weight: bold;
         }
+
+        .qcm-container {
+            margin-top: 20px;
+            padding: 20px;
+            border: 2px solid #333;
+            background-color: #fff;
+            text-align: left;
+            display: none;
+        }
+
+        .qcm-container h3 {
+            margin-top: 0;
+        }
+
+        .qcm-container button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
     </style>
 </head>
 <body>
@@ -90,15 +114,17 @@
     </div>
 
     <div id="next-step" style="display:none;">
-        <p>Bravo ! Vous avez résolu l'énigme. Cliquez ici pour la suite :</p>
-        <a id="next-link" href="URL_DE_LA_PROCHAINE_PAGE">Prochaine Étape</a>
+        <p>Bravo ! Vous avez résolu l'énigme. Répondez aux questions pour passer à la suite :</p>
     </div>
+
+    <div class="qcm-container" id="qcm-container">
+        </div>
 
     <script>
         const puzzleContainer = document.getElementById('puzzle-container');
         const nextStepDiv = document.getElementById('next-step');
+        const qcmContainer = document.getElementById('qcm-container');
         
-        // Configuration du puzzle
         const numPieces = 25;
         const gridCols = 5;
         const pieceWidth = 100;
@@ -106,6 +132,61 @@
         
         let pieces = [];
         let draggedPiece = null;
+        let currentQuestionIndex = 0;
+
+        // Tableau des 10 questions
+        const questions = [
+            {
+                question: "Question 1: Quelle est la couleur du ciel sur l'image ?",
+                answers: ["Bleu", "Vert", "Rouge"],
+                correctAnswer: "Bleu"
+            },
+            {
+                question: "Question 2: Quel est le fruit présent sur l'image ?",
+                answers: ["Pomme", "Orange", "Banane"],
+                correctAnswer: "Banane"
+            },
+            {
+                question: "Question 3: Combien d'animaux sont visibles ?",
+                answers: ["1", "2", "3"],
+                correctAnswer: "2"
+            },
+            {
+                question: "Question 4: Quelle est la forme de l'objet principal ?",
+                answers: ["Rond", "Carré", "Triangle"],
+                correctAnswer: "Carré"
+            },
+            {
+                question: "Question 5: L'image a-t-elle été prise de jour ou de nuit ?",
+                answers: ["De jour", "De nuit"],
+                correctAnswer: "De jour"
+            },
+            {
+                question: "Question 6: Y a-t-il une voiture sur l'image ?",
+                answers: ["Oui", "Non"],
+                correctAnswer: "Non"
+            },
+            {
+                question: "Question 7: Quel type d'arbre voit-on ?",
+                answers: ["Feuillu", "Conifère", "Palmier"],
+                correctAnswer: "Feuillu"
+            },
+            {
+                question: "Question 8: La scène se déroule-t-elle en ville ou à la campagne ?",
+                answers: ["En ville", "À la campagne"],
+                correctAnswer: "À la campagne"
+            },
+            {
+                question: "Question 9: Laquelle de ces couleurs domine l'image ?",
+                answers: ["Jaune", "Bleu", "Brun"],
+                correctAnswer: "Bleu"
+            },
+            {
+                question: "Question 10: Y a-t-il un pont sur l'image ?",
+                answers: ["Oui", "Non"],
+                correctAnswer: "Oui"
+            }
+        ];
 
         for (let i = 0; i < numPieces; i++) {
             const piece = document.createElement('div');
@@ -153,8 +234,45 @@
                 puzzleContainer.querySelectorAll('.puzzle-piece').forEach(piece => {
                     piece.draggable = false;
                 });
+                displayQuestion();
             }
         }
+        
+        function displayQuestion() {
+            qcmContainer.innerHTML = '';
+            if (currentQuestionIndex < questions.length) {
+                qcmContainer.style.display = 'block';
+                const currentQuestion = questions[currentQuestionIndex];
+                
+                const questionHTML = `
+                    <h3>${currentQuestion.question}</h3>
+                    <p>Choisissez la bonne réponse :</p>
+                `;
+                qcmContainer.innerHTML = questionHTML;
+
+                currentQuestion.answers.forEach(answer => {
+                    const button = document.createElement('button');
+                    button.textContent = answer;
+                    button.onclick = () => checkAnswer(answer, currentQuestion.correctAnswer);
+                    qcmContainer.appendChild(button);
+                });
+            } else {
+                alert("Félicitations ! Vous avez répondu à toutes les questions correctement.");
+            }
+        }
+
+        function checkAnswer(selectedAnswer, correctAnswer) {
+            if (selectedAnswer === correctAnswer) {
+                alert("Bonne réponse !");
+                currentQuestionIndex++;
+                displayQuestion();
+            } else {
+                alert("Mauvaise réponse. Vous devez recommencer le puzzle.");
+                window.location.href = "index.html?new_game=true";
+            }
+        }
+
+        window.checkAnswer = checkAnswer;
         
         shufflePieces();
     </script>
