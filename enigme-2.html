@@ -13,23 +13,44 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh; /* Utiliser min-height pour s'adapter au contenu */
             margin: 0;
+            padding: 20px;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px; /* Espace entre l'image de référence et le puzzle */
+            flex-wrap: wrap; /* Permet le retour à la ligne sur les petits écrans */
         }
 
         .puzzle-container {
-            width: 600px; /* Taille totale du puzzle (6 x 100px) */
-            height: 600px; /* Taille totale du puzzle (6 x 100px) */
-            margin: 20px auto;
+            width: 600px;
+            height: 600px;
             display: flex;
             flex-wrap: wrap;
             border: 2px solid #333;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
+        .reference-image-container {
+            width: 300px; /* Taille de l'image de référence (moitié de la taille du puzzle) */
+            height: 300px;
+            border: 2px solid #333;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .reference-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
         .puzzle-piece {
-            width: 100px; /* Taille d'une pièce (largeur totale / 6) */
-            height: 100px; /* Taille d'une pièce (hauteur totale / 6) */
+            width: 100px;
+            height: 100px;
             background-image: url('puzzle.jpeg');
             border: 1px solid #ccc;
             box-sizing: border-box;
@@ -59,8 +80,14 @@
     <h1>Étape 2 : L'image secrète</h1>
     <p>Réorganisez les pièces de l'image pour révéler la prochaine étape.</p>
 
-    <div class="puzzle-container" id="puzzle-container" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <div class="main-container">
+        <div class="reference-image-container">
+            <img class="reference-image" src="puzzle.jpeg" alt="Vous devez reconstituer ceci">
         </div>
+    
+        <div class="puzzle-container" id="puzzle-container" ondrop="drop(event)" ondragover="allowDrop(event)">
+            </div>
+    </div>
 
     <div id="next-step" style="display:none;">
         <p>Bravo ! Vous avez résolu l'énigme. Cliquez ici pour la suite :</p>
@@ -71,7 +98,6 @@
         const puzzleContainer = document.getElementById('puzzle-container');
         const nextStepDiv = document.getElementById('next-step');
         
-        // Configuration du puzzle
         const numPieces = 36;
         const gridCols = 6;
         const pieceWidth = 100;
@@ -80,7 +106,6 @@
         let pieces = [];
         let draggedPiece = null;
 
-        // Créer les 36 pièces du puzzle
         for (let i = 0; i < numPieces; i++) {
             const piece = document.createElement('div');
             piece.classList.add('puzzle-piece');
@@ -90,7 +115,6 @@
             pieces.push(piece);
         }
 
-        // Fonction pour mélanger et afficher les pièces
         function shufflePieces() {
             pieces.sort(() => Math.random() - 0.5);
             pieces.forEach(piece => puzzleContainer.appendChild(piece));
@@ -111,7 +135,7 @@
                 const temp = document.createElement('div');
                 puzzleContainer.insertBefore(temp, e.target);
                 puzzleContainer.insertBefore(e.target, draggedPiece);
-                puzzleContainer.insertBefore(draggedPiece, temp);
+                puzzleContainer.insertBefore(draggedElement, temp);
                 puzzleContainer.removeChild(temp);
                 checkWinCondition();
             }
@@ -132,7 +156,6 @@
         }
         
         shufflePieces();
-
     </script>
 </body>
 </html>
