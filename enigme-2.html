@@ -18,9 +18,9 @@
         }
 
         .puzzle-container {
-            width: 600px;
-            height: 400px;
-            margin: 50px auto;
+            width: 800px; /* Taille totale du puzzle (doit correspondre à la largeur de votre image) */
+            height: 800px; /* Taille totale du puzzle (doit correspondre à la hauteur de votre image) */
+            margin: 20px auto;
             display: flex;
             flex-wrap: wrap;
             border: 2px solid #333;
@@ -28,9 +28,9 @@
         }
 
         .puzzle-piece {
-            width: 200px;
-            height: 200px;
-            /* La ligne modifiée ici */
+            width: 80px; /* Taille d'une pièce (largeur totale / 10) */
+            height: 80px; /* Taille d'une pièce (hauteur totale / 10) */
+            /* Remplacez 'votre-image.jpg' par le nom de votre fichier image */
             background-image: url('puzzle.jpeg');
             border: 1px solid #ccc;
             box-sizing: border-box;
@@ -42,13 +42,6 @@
             cursor: grabbing;
         }
         
-        .puzzle-piece[data-order="1"] { background-position: 0 0; }
-        .puzzle-piece[data-order="2"] { background-position: -200px 0; }
-        .puzzle-piece[data-order="3"] { background-position: -400px 0; }
-        .puzzle-piece[data-order="4"] { background-position: 0 -200px; }
-        .puzzle-piece[data-order="5"] { background-position: -200px -200px; }
-        .puzzle-piece[data-order="6"] { background-position: -400px -200px; }
-
         #next-step {
             margin-top: 20px;
             font-size: 1.5em;
@@ -68,13 +61,7 @@
     <p>Réorganisez les pièces de l'image pour révéler la prochaine étape.</p>
 
     <div class="puzzle-container" id="puzzle-container" ondrop="drop(event)" ondragover="allowDrop(event)">
-        <div class="puzzle-piece" data-order="1" draggable="true" ondragstart="drag(event)"></div>
-        <div class="puzzle-piece" data-order="2" draggable="true" ondragstart="drag(event)"></div>
-        <div class="puzzle-piece" data-order="3" draggable="true" ondragstart="drag(event)"></div>
-        <div class="puzzle-piece" data-order="4" draggable="true" ondragstart="drag(event)"></div>
-        <div class="puzzle-piece" data-order="5" draggable="true" ondragstart="drag(event)"></div>
-        <div class="puzzle-piece" data-order="6" draggable="true" ondragstart="drag(event)"></div>
-    </div>
+        </div>
 
     <div id="next-step" style="display:none;">
         <p>Bravo ! Vous avez résolu l'énigme. Cliquez ici pour la suite :</p>
@@ -84,59 +71,71 @@
     <script>
         const puzzleContainer = document.getElementById('puzzle-container');
         const nextStepDiv = document.getElementById('next-step');
-        const pieces = Array.from(document.querySelectorAll('.puzzle-piece'));
+        
+        // Configuration du puzzle
+        const numPieces = 100;
+        const gridCols = 10;
+        const pieceWidth = 80;
+        const pieceHeight = 80;
+        
+        let pieces = [];
+        let draggedPiece = null;
 
+        // Créer les 100 pièces du puzzle
+        for (let i = 0; i < numPieces; i++) {
+            const piece = document.createElement('div');
+            piece.classList.add('puzzle-piece');
+            piece.setAttribute('data-order', i);
+            piece.setAttribute('draggable', 'true');
+            piece.style.backgroundPosition = `-${(i % gridCols) * pieceWidth}px -${Math.floor(i / gridCols) * pieceHeight}px`;
+            pieces.push(piece);
+        }
+
+        // Fonction pour mélanger et afficher les pièces
         function shufflePieces() {
             pieces.sort(() => Math.random() - 0.5);
             pieces.forEach(piece => puzzleContainer.appendChild(piece));
         }
 
-        function allowDrop(event) {
-            event.preventDefault();
-        }
+        puzzleContainer.addEventListener('dragstart', (e) => {
+            draggedPiece = e.target;
+            e.dataTransfer.setData('text/plain', null);
+        });
 
-        function drag(event) {
-            event.dataTransfer.setData("text", event.target.getAttribute('data-order'));
-            event.dataTransfer.effectAllowed = 'move';
-        }
+        puzzleContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
 
-        function drop(event) {
-            event.preventDefault();
-            const data = event.dataTransfer.getData("text");
-            const draggedElement = document.querySelector('[data-order="'+data+'"]');
-            const targetElement = event.target.closest('.puzzle-piece');
-
-            if (targetElement && targetElement !== draggedElement) {
+        puzzleContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (e.target.classList.contains('puzzle-piece') && e.target !== draggedPiece) {
                 const temp = document.createElement('div');
-                puzzleContainer.insertBefore(temp, targetElement);
-                puzzleContainer.insertBefore(targetElement, draggedElement);
-                puzzleContainer.insertBefore(draggedElement, temp);
+                puzzleContainer.insertBefore(temp, e.target);
+                puzzleContainer.insertBefore(e.target, draggedPiece);
+                puzzleContainer.insertBefore(draggedPiece, temp);
                 puzzleContainer.removeChild(temp);
                 checkWinCondition();
             }
-        }
+        });
 
         function checkWinCondition() {
-            const currentOrder = Array.from(puzzleContainer.children).map(piece => piece.getAttribute('data-order'));
-            const correctOrder = ['1', '2', '3', '4', '5', '6'];
+            const currentOrder = Array.from(puzzleContainer.children).map(piece => parseInt(piece.getAttribute('data-order')));
+            const correctOrder = Array.from({length: numPieces}, (_, i) => i);
 
-            let isCorrect = true;
-            for (let i = 0; i < currentOrder.length; i++) {
-                if (currentOrder[i] !== correctOrder[i]) {
-                    isCorrect = false;
-                    break;
-                }
-            }
-
-            if (isCorrect) {
+            if (JSON.stringify(currentOrder) === JSON.stringify(correctOrder)) {
                 nextStepDiv.style.display = 'block';
                 puzzleContainer.style.border = "5px solid green";
-                puzzleContainer.removeEventListener('dragstart', drag);
-                puzzleContainer.removeEventListener('drop', drop);
+                puzzleContainer.style.boxShadow = "0 0 15px 5px green";
+                // Désactiver le glisser-déposer après la victoire
+                puzzleContainer.querySelectorAll('.puzzle-piece').forEach(piece => {
+                    piece.draggable = false;
+                });
             }
         }
-
+        
+        // Lancer le jeu
         shufflePieces();
+
     </script>
 </body>
 </html>
