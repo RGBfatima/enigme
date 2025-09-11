@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cœur Dynamique</title>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        #heartCanvas {
+            border: 4px solid #333;
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="heartCanvas" width="500" height="500"></canvas>
+
+    <script>
+        const canvas = document.getElementById('heartCanvas');
+        const ctx = canvas.getContext('2d');
+        const totalSteps = 200; // Nombre d'étapes pour le tracé de l'animation
+        let currentStep = 0;
+
+        // Définir les points du cœur
+        const startX = 250;
+        const startY = 400;
+
+        const pathPoints = [
+            [startX, startY], // Point de départ
+            [50, 200], // Contrôle 1
+            [250, 50],  // Point de fin de la première courbe
+            [450, 200], // Contrôle 2
+            [startX, startY]  // Point de retour
+        ];
+
+        function drawHeart() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Nettoyer le canvas à chaque étape
+
+            ctx.lineWidth = 10; // Épaisseur du contour noir
+            ctx.strokeStyle = '#222'; // Couleur du contour
+            ctx.fillStyle = '#ff3333'; // Couleur de remplissage du cœur
+
+            ctx.beginPath();
+            
+            // Dessiner la première moitié du cœur
+            const p1 = pathPoints[0];
+            const p2 = pathPoints[1];
+            const cp1 = [250, 20]; // Point de contrôle pour l'arrondi gauche
+            
+            ctx.moveTo(p1[0], p1[1]);
+            const step1 = Math.min(currentStep, totalSteps / 2);
+            ctx.lineTo(p1[0] - (p1[0] - p2[0]) * (step1 / (totalSteps / 2)), p1[1] - (p1[1] - p2[1]) * (step1 / (totalSteps / 2)));
+            
+            // Dessiner la deuxième moitié du cœur
+            const p3 = pathPoints[2];
+            const p4 = pathPoints[3];
+            const cp2 = [250, 20]; // Point de contrôle pour l'arrondi droit
+            
+            const step2 = Math.min(currentStep - (totalSteps / 2), totalSteps / 2);
+            if (currentStep > totalSteps / 2) {
+                ctx.moveTo(p3[0], p3[1]);
+                ctx.lineTo(p3[0] - (p3[0] - p4[0]) * (step2 / (totalSteps / 2)), p3[1] - (p3[1] - p4[1]) * (step2 / (totalSteps / 2)));
+            }
+
+            // Pour l'animation complète
+            if (currentStep < totalSteps) {
+                currentStep++;
+                requestAnimationFrame(drawHeart);
+            } else {
+                ctx.fill(); // Remplir le cœur une fois le tracé terminé
+                ctx.stroke(); // Dessiner le contour final
+            }
+        }
+
+        drawHeart(); // Lancer l'animation
+    </script>
+</body>
+</html>
