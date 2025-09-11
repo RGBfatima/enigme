@@ -3,85 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cœur Dynamique</title>
+    <title>Pour toi ❤️</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #f0f0f0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
         }
 
-        #heartCanvas {
-            border: 4px solid #333;
-            background-color: #fff;
+        .container {
+            text-align: center;
+            position: relative;
+        }
+
+        #startButton {
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            animation: pulse 2s infinite;
+        }
+
+        #startButton:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        #heartContainer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        #heartContainer.show {
+            opacity: 1;
+        }
+
+        #message {
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            opacity: 0;
+            animation: fadeInMessage 2s ease forwards;
+            animation-delay: 1s;
+            white-space: nowrap;
+        }
+
+        @keyframes fadeInMessage {
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(-10px);
+            }
+        }
+
+        canvas {
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));
+            animation: heartbeat 1.5s ease-in-out infinite;
+            animation-delay: 1.5s;
+        }
+
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.1); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.1); }
+            70% { transform: scale(1); }
+        }
+
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0;
+            animation: float 4s ease-out forwards;
+        }
+
+        @keyframes float {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(0);
+            }
+            15% {
+                transform: translateY(-20px) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-150px) translateX(var(--drift)) scale(0.5);
+            }
+        }
+
+        .heart-small {
+            color: #ff1744;
+            font-size: 20px;
         }
     </style>
 </head>
 <body>
-
-    <canvas id="heartCanvas" width="500" height="500"></canvas>
+    <div class="container">
+        <button id="startButton">Es-tu prête? 💕</button>
+        <div id="heartContainer">
+            <div id="message">Je t'aime de tout mon cœur ❤️</div>
+            <canvas id="heartCanvas"></canvas>
+        </div>
+    </div>
 
     <script>
+        const button = document.getElementById('startButton');
+        const heartContainer = document.getElementById('heartContainer');
         const canvas = document.getElementById('heartCanvas');
         const ctx = canvas.getContext('2d');
-        const totalSteps = 200; // Nombre d'étapes pour le tracé de l'animation
-        let currentStep = 0;
-
-        // Définir les points du cœur
-        const startX = 250;
-        const startY = 400;
-
-        const pathPoints = [
-            [startX, startY], // Point de départ
-            [50, 200], // Contrôle 1
-            [250, 50],  // Point de fin de la première courbe
-            [450, 200], // Contrôle 2
-            [startX, startY]  // Point de retour
+        
+        // Définir la taille du pixel
+        const pixelSize = 8;
+        
+        // Pattern du cœur pixelisé (basé sur l'image fournie)
+        const heartPattern = [
+            '    ####    ####    ',
+            '  ################  ',
+            ' ################## ',
+            '####################',
+            '####################',
+            '####################',
+            '####################',
+            '####################',
+            ' ################## ',
+            '  ################ ',
+            '   ############## ',
+            '    ############ ',
+            '     ########## ',
+            '      ######## ',
+            '       ###### ',
+            '        #### ',
+            '         ## '
         ];
 
-        function drawHeart() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Nettoyer le canvas à chaque étape
+        // Position du reflet blanc (comme dans l'image)
+        const highlightPattern = [
+            '     #              ',
+            '    ##              ',
+            '     #              ',
+            '                    ',
+            '                    ',
+            '                    ',
+            '                    ',
+            '                    ',
+            '                    ',
+            '                    ',
+            '                    ',
+            '                    ',
+            '                    ',
+            '                    ',
+            '                    ',
+            '                    ',
+            '                    '
+        ];
 
-            ctx.lineWidth = 10; // Épaisseur du contour noir
-            ctx.strokeStyle = '#222'; // Couleur du contour
-            ctx.fillStyle = '#ff3333'; // Couleur de remplissage du cœur
+        canvas.width = heartPattern[0].length * pixelSize;
+        canvas.height = heartPattern.length * pixelSize;
 
-            ctx.beginPath();
-            
-            // Dessiner la première moitié du cœur
-            const p1 = pathPoints[0];
-            const p2 = pathPoints[1];
-            const cp1 = [250, 20]; // Point de contrôle pour l'arrondi gauche
-            
-            ctx.moveTo(p1[0], p1[1]);
-            const step1 = Math.min(currentStep, totalSteps / 2);
-            ctx.lineTo(p1[0] - (p1[0] - p2[0]) * (step1 / (totalSteps / 2)), p1[1] - (p1[1] - p2[1]) * (step1 / (totalSteps / 2)));
-            
-            // Dessiner la deuxième moitié du cœur
-            const p3 = pathPoints[2];
-            const p4 = pathPoints[3];
-            const cp2 = [250, 20]; // Point de contrôle pour l'arrondi droit
-            
-            const step2 = Math.min(currentStep - (totalSteps / 2), totalSteps / 2);
-            if (currentStep > totalSteps / 2) {
-                ctx.moveTo(p3[0], p3[1]);
-                ctx.lineTo(p3[0] - (p3[0] - p4[0]) * (step2 / (totalSteps / 2)), p3[1] - (p3[1] - p4[1]) * (step2 / (totalSteps / 2)));
-            }
+        function drawPixel(x, y, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+        }
 
-            // Pour l'animation complète
-            if (currentStep < totalSteps) {
-                currentStep++;
-                requestAnimationFrame(drawHeart);
-            } else {
-                ctx.fill(); // Remplir le cœur une fois le tracé terminé
-                ctx.stroke(); // Dessiner le contour final
+        function drawHeart(progress) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const pixelsToShow = Math.floor(progress * getTotalPixels());
+            let pixelsDrawn = 0;
+            
+            // Dessiner le cœur de manière progressive
+            for (let y = 0; y < heartPattern.length; y++) {
+                for (let x = 0; x < heartPattern[y].length; x++) {
+                    if (heartPattern[y][x] === '#' && pixelsDrawn < pixelsToShow) {
+                        // Couleur principale rouge
+                        drawPixel(x, y, '#DC143C');
+                        
+                        // Ajouter le contour noir
+                        if (isEdge(x, y)) {
+                            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                            ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+                        }
+                        
+                        // Ajouter le reflet blanc
+                        if (highlightPattern[y] && highlightPattern[y][x] === '#') {
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                            ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+                        }
+                        
+                        pixelsDrawn++;
+                    }
+                }
             }
         }
 
-        drawHeart(); // Lancer l'animation
+        function getTotalPixels() {
+            let count = 0;
+            for (let row of heartPattern) {
+                for (let char of row) {
+                    if (char === '#') count++;
+                }
+            }
+            return count;
+        }
+
+        function isEdge(x, y) {
+            // Vérifier si c'est un pixel de bordure
+            const dirs = [[-1,0], [1,0], [0,-1], [0,1]];
+            for (let [dx, dy] of dirs) {
+                const nx = x + dx;
+                const ny = y + dy;
+                if (ny < 0 || ny >= heartPattern.length || 
+                    nx < 0 || nx >= heartPattern[ny].length || 
+                    heartPattern[ny][nx] !== '#') {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function createParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.className = 'particle heart-small';
+            particle.innerHTML = '❤️';
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            particle.style.setProperty('--drift', (Math.random() - 0.5) * 100 + 'px');
+            document.body.appendChild(particle);
+            
+            setTimeout(() => particle.remove(), 4000);
+        }
+
+        button.addEventListener('click', function() {
+            button.style.display = 'none';
+            heartContainer.classList.add('show');
+            
+            // Animation progressive du cœur
+            let progress = 0;
+            const animationDuration = 1500;
+            const startTime = Date.now();
+            
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                progress = Math.min(elapsed / animationDuration, 1);
+                
+                // Courbe d'accélération
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                
+                drawHeart(easeProgress);
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // Créer des particules de cœur autour
+                    for (let i = 0; i < 15; i++) {
+                        setTimeout(() => {
+                            const rect = canvas.getBoundingClientRect();
+                            const x = rect.left + rect.width/2 + (Math.random() - 0.5) * 200;
+                            const y = rect.top + rect.height/2 + (Math.random() - 0.5) * 200;
+                            createParticle(x, y);
+                        }, i * 100);
+                    }
+                }
+            }
+            
+            animate();
+        });
+
+        // Créer des particules ambiantes occasionnelles
+        setInterval(() => {
+            if (heartContainer.classList.contains('show')) {
+                const x = Math.random() * window.innerWidth;
+                const y = Math.random() * window.innerHeight;
+                createParticle(x, y);
+            }
+        }, 2000);
     </script>
 </body>
 </html>
