@@ -18,8 +18,8 @@
         }
 
         .puzzle-container {
-            width: 800px; /* Taille totale du puzzle (doit correspondre à la largeur de votre image) */
-            height: 800px; /* Taille totale du puzzle (doit correspondre à la hauteur de votre image) */
+            width: 600px; /* Taille totale du puzzle (6 x 100px) */
+            height: 600px; /* Taille totale du puzzle (6 x 100px) */
             margin: 20px auto;
             display: flex;
             flex-wrap: wrap;
@@ -28,9 +28,8 @@
         }
 
         .puzzle-piece {
-            width: 80px; /* Taille d'une pièce (largeur totale / 10) */
-            height: 80px; /* Taille d'une pièce (hauteur totale / 10) */
-            /* Remplacez 'votre-image.jpg' par le nom de votre fichier image */
+            width: 100px; /* Taille d'une pièce (largeur totale / 6) */
+            height: 100px; /* Taille d'une pièce (hauteur totale / 6) */
             background-image: url('puzzle.jpeg');
             border: 1px solid #ccc;
             box-sizing: border-box;
@@ -73,15 +72,15 @@
         const nextStepDiv = document.getElementById('next-step');
         
         // Configuration du puzzle
-        const numPieces = 25;
-        const gridCols = 10;
-        const pieceWidth = 80;
-        const pieceHeight = 80;
+        const numPieces = 36;
+        const gridCols = 6;
+        const pieceWidth = 100;
+        const pieceHeight = 100;
         
         let pieces = [];
         let draggedPiece = null;
 
-        // Créer les 100 pièces du puzzle
+        // Créer les 36 pièces du puzzle
         for (let i = 0; i < numPieces; i++) {
             const piece = document.createElement('div');
             piece.classList.add('puzzle-piece');
@@ -126,14 +125,12 @@
                 nextStepDiv.style.display = 'block';
                 puzzleContainer.style.border = "5px solid green";
                 puzzleContainer.style.boxShadow = "0 0 15px 5px green";
-                // Désactiver le glisser-déposer après la victoire
                 puzzleContainer.querySelectorAll('.puzzle-piece').forEach(piece => {
                     piece.draggable = false;
                 });
             }
         }
         
-        // Lancer le jeu
         shufflePieces();
 
     </script>
