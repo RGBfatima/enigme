@@ -27,8 +27,8 @@
         }
 
         .puzzle-container {
-            width: 600px;
-            height: 600px;
+            width: 400px; /* Taille totale du puzzle (4 x 100px) */
+            height: 400px; /* Taille totale du puzzle (4 x 100px) */
             display: flex;
             flex-wrap: wrap;
             border: 2px solid #333;
@@ -36,8 +36,8 @@
         }
 
         .reference-image-container {
-            width: 300px;
-            height: 300px;
+            width: 200px; /* Taille de l'image de référence (moitié de la taille du puzzle) */
+            height: 200px;
             border: 2px solid #333;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
@@ -49,8 +49,8 @@
         }
 
         .puzzle-piece {
-            width: 100px;
-            height: 100px;
+            width: 100px; /* Taille d'une pièce (largeur totale / 4) */
+            height: 100px; /* Taille d'une pièce (hauteur totale / 4) */
             background-image: url('puzzle.jpg');
             border: 1px solid #ccc;
             box-sizing: border-box;
@@ -98,8 +98,9 @@
         const puzzleContainer = document.getElementById('puzzle-container');
         const nextStepDiv = document.getElementById('next-step');
         
-        const numPieces = 36;
-        const gridCols = 6;
+        // Configuration du puzzle
+        const numPieces = 16;
+        const gridCols = 4;
         const pieceWidth = 100;
         const pieceHeight = 100;
         
