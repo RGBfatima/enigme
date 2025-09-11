@@ -21,14 +21,14 @@
         .main-container {
             display: flex;
             justify-content: center;
-            align-items: center; /* Ligne modifiée ici */
+            align-items: center;
             gap: 40px;
             flex-wrap: wrap;
         }
 
         .puzzle-container {
-            width: 400px;
-            height: 400px;
+            width: 400px; /* Largeur du puzzle (4 pièces x 100px) */
+            height: 500px; /* Hauteur du puzzle (5 pièces x 100px) */
             display: flex;
             flex-wrap: wrap;
             border: 2px solid #333;
@@ -36,8 +36,8 @@
         }
 
         .reference-image-container {
-            width: 200px;
-            height: 200px; /* J'ai aussi ajusté la hauteur pour que l'image de référence soit carrée */
+            width: 200px; /* Moitié de la largeur du puzzle */
+            height: 250px; /* Moitié de la hauteur du puzzle */
             border: 2px solid #333;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
@@ -49,8 +49,8 @@
         }
 
         .puzzle-piece {
-            width: 100px;
-            height: 100px;
+            width: 100px; /* Taille d'une pièce */
+            height: 100px; /* Taille d'une pièce */
             background-image: url('puzzle.jpg');
             border: 1px solid #ccc;
             box-sizing: border-box;
@@ -98,7 +98,8 @@
         const puzzleContainer = document.getElementById('puzzle-container');
         const nextStepDiv = document.getElementById('next-step');
         
-        const numPieces = 16;
+        // Configuration du puzzle
+        const numPieces = 20;
         const gridCols = 4;
         const pieceWidth = 100;
         const pieceHeight = 100;
