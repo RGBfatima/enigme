@@ -13,7 +13,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh; /* Utiliser min-height pour s'adapter au contenu */
+            min-height: 100vh;
             margin: 0;
             padding: 20px;
         }
@@ -22,8 +22,8 @@
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            gap: 40px; /* Espace entre l'image de référence et le puzzle */
-            flex-wrap: wrap; /* Permet le retour à la ligne sur les petits écrans */
+            gap: 40px;
+            flex-wrap: wrap;
         }
 
         .puzzle-container {
@@ -36,7 +36,7 @@
         }
 
         .reference-image-container {
-            width: 300px; /* Taille de l'image de référence (moitié de la taille du puzzle) */
+            width: 300px;
             height: 300px;
             border: 2px solid #333;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -86,7 +86,7 @@
         </div>
     
         <div class="puzzle-container" id="puzzle-container" ondrop="drop(event)" ondragover="allowDrop(event)">
-            </div>
+        </div>
     </div>
 
     <div id="next-step" style="display:none;">
@@ -135,7 +135,7 @@
                 const temp = document.createElement('div');
                 puzzleContainer.insertBefore(temp, e.target);
                 puzzleContainer.insertBefore(e.target, draggedPiece);
-                puzzleContainer.insertBefore(draggedElement, temp);
+                puzzleContainer.insertBefore(draggedPiece, temp);
                 puzzleContainer.removeChild(temp);
                 checkWinCondition();
             }
