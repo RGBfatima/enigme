@@ -5,101 +5,100 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vica ❤️</title>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
     body {
       min-height: 100vh;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display: flex;
       justify-content: center;
       align-items: center;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
     }
-    .container { text-align:center; position:relative; z-index:10; }
+    .container { text-align: center; }
     #startButton {
-      background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
-      color:white; border:none; padding:20px 50px; font-size:24px; font-weight:bold;
-      border-radius:50px; cursor:pointer; box-shadow:0 10px 30px rgba(0,0,0,0.3);
-      transition:all 0.3s ease; letter-spacing:1px; animation:pulse 2s infinite;
-      min-width:280px; min-height:70px;
+      padding: 20px 50px;
+      font-size: 24px;
+      border-radius: 50px;
+      border: none;
+      background: linear-gradient(45deg, #f093fb, #f5576c);
+      color: #fff;
+      cursor: pointer;
     }
-    #startButton:hover { transform:translateY(-3px); box-shadow:0 15px 40px rgba(0,0,0,0.4); }
-    @keyframes pulse { 0%{transform:scale(1);} 50%{transform:scale(1.05);} 100%{transform:scale(1);} }
+    #heartContainer { opacity: 0; transition: opacity 1s ease; }
+    #heartContainer.show { opacity: 1; }
 
-    #heartContainer { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); opacity:0; transition:opacity 1s ease; z-index:50; pointer-events:none; }
-    #heartContainer.show { opacity:1; }
-
-    #message {
-      position:absolute; top:-80px; left:50%; transform:translateX(-50%);
-      color:white; font-size:32px; font-weight:bold; text-shadow:2px 2px 4px rgba(0,0,0,0.3);
-      opacity:0; animation:fadeInMessage 2s ease forwards; animation-delay:1s; white-space:nowrap;
+    canvas {
+      filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));
+      pointer-events: none;
     }
-    @keyframes fadeInMessage { to { opacity:1; transform:translateX(-50%) translateY(-10px);} }
 
-    canvas { filter:drop-shadow(0 10px 30px rgba(0,0,0,0.3)); animation:heartbeat 1.5s ease-in-out infinite; animation-delay:1.5s; }
-    @keyframes heartbeat {0%{transform:scale(1);}14%{transform:scale(1.1);}28%{transform:scale(1);}42%{transform:scale(1.1);}70%{transform:scale(1);} }
-
-    .particle { position:fixed; pointer-events:none; opacity:0; animation:float 4s ease-out forwards; z-index:1; }
-    @keyframes float {
-      0%{opacity:1; transform:translateY(0) scale(0);}
-      15%{transform:translateY(-20px) scale(1);}
-      100%{opacity:0; transform:translateY(-150px) translateX(var(--drift)) scale(0.5);}
-    }
-    .heart-small { color:#ff1744; font-size:20px; }
-
-    /* input pour phrase base64 */
-    #decodeStep { margin-top:25px; display:none; }
+    /* étape décodage */
+    #decodeStep { margin-top: 20px; display: none; }
+    #hintBase64 { color: #fff; margin-bottom: 6px; }
     #decodeInput {
-      padding:10px 14px; border:none; border-radius:8px; font-size:16px;
-      box-shadow:0 4px 12px rgba(0,0,0,0.2);
-      min-width:260px; text-align:center;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+      min-width: 260px;
     }
-    #hintBase64 { margin-bottom:10px; color:#fff; font-size:14px; }
 
-    /* rebus caché */
-    #rebus { margin-top:20px; display:none; text-align:center; user-select:none; color:#fff; }
-    #rebus .r-line { font-size:44px; font-weight:700; text-shadow:0 4px 18px rgba(0,0,0,0.35); display:flex; gap:14px; justify-content:center; align-items:center; }
-    #rebus .r-emoji { }
-    #rebus .r-letter { background:rgba(255,255,255,0.06); padding:6px 12px; border-radius:10px; }
-    #rebus .r-hint { margin-top:8px; font-size:14px; color:rgba(255,255,255,0.9); }
+    /* rebus */
+    #rebus { display: none; margin-top: 20px; color: #fff; }
+    #rebus .r-line {
+      font-size: 44px;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
 
-    /* secret code caché */
-    #secretCode { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); pointer-events:none; user-select:none; color:transparent; background:transparent; font-size:16px; white-space:nowrap; z-index:-1; }
-    #copyToast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); color:#fff; padding:10px 16px; border-radius:10px; font-weight:600; display:none; z-index:9999; }
+    /* toast copie */
+    #copyToast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <button id="startButton">T'es prête bew?</button>
     <div id="heartContainer">
-      <div id="message">(Base 64) SmUgdCdhaW1lIG1vbiBjxZN1ciDinaTvuI8gbGEgY2zDqSBkZSBsJ8OpbmlnbWU6</div>
       <canvas id="heartCanvas"></canvas>
-      <div id="secretCode">1iQagj-WOVjFlJr-bJvvPszqExAnpjK4w</div>
-
-      <!-- étape décodage -->
       <div id="decodeStep">
-        <div id="hintBase64">Entre ici la phrase décodée :</div>
-        <input id="decodeInput" type="text" placeholder="Tape la phrase..." />
+        <div id="hintBase64">(Base64) SmUgdCdhaW1lIG1vbiBjxZN1ciDinaTvuI8gbGEgY2zDqSBkZSBsJ8OpbmlnbWU6</div>
+        <input id="decodeInput" type="text" placeholder="Tape ici..." />
       </div>
-
-      <!-- rebus caché -->
       <div id="rebus">
-        <div class="r-line"><span class="r-emoji">🎮</span><span>+</span><span class="r-letter">A</span></div>
-        <div class="r-hint">Combine les deux → ?</div>
+        <div class="r-line">🎮 + A</div>
+        <div>Combine les deux → ?</div>
       </div>
     </div>
   </div>
-
   <div id="copyToast">Code secret copié ✅</div>
 
   <script>
-    const button = document.getElementById('startButton');
-    const heartContainer = document.getElementById('heartContainer');
-    const canvas = document.getElementById('heartCanvas');
-    const ctx = canvas.getContext('2d');
-    const decodeStep = document.getElementById('decodeStep');
-    const decodeInput = document.getElementById('decodeInput');
-    const rebus = document.getElementById('rebus');
+    const button = document.getElementById("startButton");
+    const heartContainer = document.getElementById("heartContainer");
+    const decodeStep = document.getElementById("decodeStep");
+    const decodeInput = document.getElementById("decodeInput");
+    const rebus = document.getElementById("rebus");
+    const toast = document.getElementById("copyToast");
+    const canvas = document.getElementById("heartCanvas");
+    const ctx = canvas.getContext("2d");
 
+    // Phrase attendue (décodée du base64 ci-dessus)
+    const correctPhrase = "Je t'aime mon cœur ❤️ la clé de l'énigme:";
+    // Code secret (stocké uniquement ici, pas dans le DOM)
+    const secretCode = "1iQagj-WOVjFlJr-bJvvPszqExAnpjK4w";
+
+    // === Animation du cœur pixelisé ===
     const pixelSize = 8;
     const heartPattern = [
       '    ####    ####    ',
@@ -120,93 +119,83 @@
       '        #### ',
       '         ## '
     ];
-    const highlightPattern = [
-      '     #              ',
-      '    ##              ',
-      '     #              ',
-      '                    ',
-      '                    ',
-      '                    ',
-      '                    ',
-      '                    ',
-      '                    ',
-      '                    ',
-      '                    ',
-      '                    ',
-      '                    ',
-      '                    ',
-      '                    ',
-      '                    ',
-      '                    '
-    ];
-
     canvas.width = heartPattern[0].length * pixelSize;
     canvas.height = heartPattern.length * pixelSize;
 
-    function drawPixel(x,y,color){ ctx.fillStyle=color; ctx.fillRect(x*pixelSize,y*pixelSize,pixelSize,pixelSize);}
-    function drawHeart(progress){
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      const pixelsToShow = Math.floor(progress * getTotalPixels());
-      let pixelsDrawn = 0;
-      for(let y=0;y<heartPattern.length;y++){
-        for(let x=0;x<heartPattern[y].length;x++){
-          if(heartPattern[y][x]==='#' && pixelsDrawn<pixelsToShow){
-            drawPixel(x,y,'#DC143C');
-            if(isEdge(x,y)){ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(x*pixelSize,y*pixelSize,pixelSize,pixelSize);}
-            if(highlightPattern[y] && highlightPattern[y][x]==='#'){ctx.fillStyle='rgba(255,255,255,0.6)';ctx.fillRect(x*pixelSize,y*pixelSize,pixelSize,pixelSize);}
-            pixelsDrawn++;
+    function drawPixel(x, y, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+    }
+    function drawHeart(progress) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const total = getTotalPixels();
+      let shown = Math.floor(progress * total);
+      let drawn = 0;
+      for (let y = 0; y < heartPattern.length; y++) {
+        for (let x = 0; x < heartPattern[y].length; x++) {
+          if (heartPattern[y][x] === "#" && drawn < shown) {
+            drawPixel(x, y, "#DC143C");
+            drawn++;
           }
         }
       }
     }
-    function getTotalPixels(){ let count=0; for(let row of heartPattern){for(let c of row){if(c==='#')count++;}} return count;}
-    function isEdge(x,y){const dirs=[[-1,0],[1,0],[0,-1],[0,1]];for(let [dx,dy] of dirs){const nx=x+dx,ny=y+dy;if(ny<0||ny>=heartPattern.length||nx<0||nx>=heartPattern[ny].length||heartPattern[ny][nx]!=='#'){return true;}}return false;}
-    function createParticle(x,y){const p=document.createElement('div');p.className='particle heart-small';p.innerHTML='❤️';p.style.left=x+'px';p.style.top=y+'px';p.style.setProperty('--drift',(Math.random()-0.5)*100+'px');document.body.appendChild(p);setTimeout(()=>p.remove(),4000);}
-
-    function handleButtonClick(e){
-      e.preventDefault();
-      button.style.display='none';
-      heartContainer.classList.add('show');
-      let progress=0; const startTime=Date.now(); const duration=1500;
-      function animate(){
-        const elapsed=Date.now()-startTime;
-        progress=Math.min(elapsed/duration,1);
-        const ease=1-Math.pow(1-progress,3);
-        drawHeart(ease);
-        if(progress<1){requestAnimationFrame(animate);}else{
-          for(let i=0;i<15;i++){setTimeout(()=>{const rect=canvas.getBoundingClientRect();const x=rect.left+rect.width/2+(Math.random()-0.5)*200;const y=rect.top+rect.height/2+(Math.random()-0.5)*200;createParticle(x,y);},i*100);}
-          decodeStep.style.display='block'; // afficher étape base64
-        }
-      }
-      animate();
+    function getTotalPixels() {
+      return heartPattern.reduce((acc, row) =>
+        acc + row.split("").filter(ch => ch === "#").length, 0);
     }
-    button.addEventListener('click',handleButtonClick);
 
-    setInterval(()=>{if(heartContainer.classList.contains('show')){const x=Math.random()*window.innerWidth;const y=Math.random()*window.innerHeight;createParticle(x,y);}},2000);
+    button.addEventListener("click", () => {
+      button.style.display = "none";
+      heartContainer.classList.add("show");
+      // animation cœur
+      let start = Date.now();
+      let duration = 1500;
+      function anim() {
+        let t = (Date.now() - start) / duration;
+        if (t > 1) t = 1;
+        drawHeart(1 - Math.pow(1 - t, 3));
+        if (t < 1) requestAnimationFrame(anim);
+      }
+      anim();
+      // après animation → afficher l'étape décodage
+      setTimeout(() => { decodeStep.style.display = "block"; }, duration);
+    });
 
-    // === Étape Base64 ===
-    const correctPhrase = "Je t'aime mon cœur ❤️ la clé de l'énigme:"; // phrase décodée attendue
-    decodeInput.addEventListener('input',()=>{
-      if(decodeInput.value.trim()===correctPhrase){
-        decodeStep.style.display='none';
-        rebus.style.display='block';
+    decodeInput.addEventListener("input", () => {
+      if (normalize(decodeInput.value) === normalize(correctPhrase)) {
+        decodeStep.style.display = "none";
+        rebus.style.display = "block";
       }
     });
 
-    // === Gestion du code secret avec Ctrl+A ===
-    (function(){
-      const secret=document.getElementById('secretCode');
-      const toast=document.getElementById('copyToast');
-      function showToast(msg){toast.textContent=msg;toast.style.display='block';toast.style.opacity='1';setTimeout(()=>{toast.style.transition='opacity 300ms';toast.style.opacity='0';},900);setTimeout(()=>{toast.style.display='none';toast.style.transition='';},1200);}
-      window.addEventListener('keydown',async function(e){
-        const isMac=/MAC/i.test(navigator.platform);const ctrlOrCmd=isMac?e.metaKey:e.ctrlKey;
-        if(ctrlOrCmd && (e.key==='a'||e.key==='A')){
-          e.preventDefault(); const text=secret.textContent.trim();
-          if(navigator.clipboard){try{await navigator.clipboard.writeText(text);showToast("Code secret copié ✅");}catch(err){fallback(text);}}else{fallback(text);}
+    // Ctrl+A → copie le secret seulement si rebus affiché
+    window.addEventListener("keydown", async (e) => {
+      const isMac = /MAC/i.test(navigator.platform);
+      const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+      if (ctrlOrCmd && (e.key === "a" || e.key === "A")) {
+        if (rebus.style.display === "block") {
+          e.preventDefault();
+          try {
+            await navigator.clipboard.writeText(secretCode);
+            showToast("Code secret copié ✅");
+          } catch {
+            showToast("Impossible de copier");
+          }
         }
-      });
-      function fallback(text){const ta=document.createElement('textarea');ta.value=text;ta.setAttribute('readonly','');ta.style.position='absolute';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');showToast("Code secret copié ✅");}catch(err){showToast("Erreur de copie");}document.body.removeChild(ta);}
-    })();
+      }
+    });
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.style.display = "block";
+      setTimeout(() => { toast.style.display = "none"; }, 1000);
+    }
+
+    // Normaliser accents/majuscules
+    function normalize(str) {
+      return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    }
   </script>
 </body>
 </html>
