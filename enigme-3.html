@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pour toi ❤️</title>
+    <title>Vica ❤️</title>
     <style>
         * {
             margin: 0;
@@ -18,12 +18,12 @@
             justify-content: center;
             align-items: center;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
         }
 
         .container {
             text-align: center;
             position: relative;
+            z-index: 10;
         }
 
         #startButton {
@@ -39,11 +39,21 @@
             transition: all 0.3s ease;
             letter-spacing: 1px;
             animation: pulse 2s infinite;
+            position: relative;
+            z-index: 100;
+            min-width: 280px;
+            min-height: 70px;
+            display: inline-block;
         }
 
         #startButton:hover {
             transform: translateY(-3px);
             box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        #startButton:active {
+            transform: translateY(0px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
 
         @keyframes pulse {
@@ -53,12 +63,14 @@
         }
 
         #heartContainer {
-            position: absolute;
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             opacity: 0;
             transition: opacity 1s ease;
+            z-index: 50;
+            pointer-events: none;
         }
 
         #heartContainer.show {
@@ -102,10 +114,11 @@
         }
 
         .particle {
-            position: absolute;
+            position: fixed;
             pointer-events: none;
             opacity: 0;
             animation: float 4s ease-out forwards;
+            z-index: 1;
         }
 
         @keyframes float {
@@ -264,7 +277,11 @@
             setTimeout(() => particle.remove(), 4000);
         }
 
-        button.addEventListener('click', function() {
+        // Améliorer l'événement click avec plusieurs méthodes
+        function handleButtonClick(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
             button.style.display = 'none';
             heartContainer.classList.add('show');
             
@@ -298,6 +315,15 @@
             }
             
             animate();
+        }
+
+        // Ajouter plusieurs écouteurs d'événements pour une meilleure compatibilité
+        button.addEventListener('click', handleButtonClick);
+        button.addEventListener('touchstart', handleButtonClick);
+
+        // Ajouter un indicateur visuel de debug (optionnel)
+        button.addEventListener('mouseenter', function() {
+            console.log('Hover détecté');
         });
 
         // Créer des particules ambiantes occasionnelles
