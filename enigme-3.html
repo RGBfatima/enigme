@@ -139,6 +139,36 @@
             color: #ff1744;
             font-size: 20px;
         }
+
+        /* secret code caché */
+        #secretCode {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            user-select: none;
+            color: transparent;
+            background: transparent;
+            font-size: 16px;
+            white-space: nowrap;
+            z-index: -1;
+        }
+
+        /* petit message de confirmation copie */
+        #copyToast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            display: none;
+            z-index: 9999;
+        }
     </style>
 </head>
 <body>
@@ -151,6 +181,9 @@
         </div>
     </div>
 
+    <!-- toast de feedback -->
+    <div id="copyToast">Code secret copié ✅</div>
+
     <script>
         const button = document.getElementById('startButton');
         const heartContainer = document.getElementById('heartContainer');
@@ -160,7 +193,7 @@
         // Définir la taille du pixel
         const pixelSize = 8;
         
-        // Pattern du cœur pixelisé (basé sur l'image fournie)
+        // Pattern du cœur pixelisé
         const heartPattern = [
             '    ####    ####    ',
             '  ################  ',
@@ -181,7 +214,7 @@
             '         ## '
         ];
 
-        // Position du reflet blanc (comme dans l'image)
+        // Position du reflet blanc
         const highlightPattern = [
             '     #              ',
             '    ##              ',
@@ -216,20 +249,16 @@
             const pixelsToShow = Math.floor(progress * getTotalPixels());
             let pixelsDrawn = 0;
             
-            // Dessiner le cœur de manière progressive
             for (let y = 0; y < heartPattern.length; y++) {
                 for (let x = 0; x < heartPattern[y].length; x++) {
                     if (heartPattern[y][x] === '#' && pixelsDrawn < pixelsToShow) {
-                        // Couleur principale rouge
                         drawPixel(x, y, '#DC143C');
                         
-                        // Ajouter le contour noir
                         if (isEdge(x, y)) {
                             ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
                             ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
                         }
                         
-                        // Ajouter le reflet blanc
                         if (highlightPattern[y] && highlightPattern[y][x] === '#') {
                             ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
                             ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
@@ -252,7 +281,6 @@
         }
 
         function isEdge(x, y) {
-            // Vérifier si c'est un pixel de bordure
             const dirs = [[-1,0], [1,0], [0,-1], [0,1]];
             for (let [dx, dy] of dirs) {
                 const nx = x + dx;
@@ -278,7 +306,6 @@
             setTimeout(() => particle.remove(), 4000);
         }
 
-        // Améliorer l'événement click avec plusieurs méthodes
         function handleButtonClick(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -286,7 +313,6 @@
             button.style.display = 'none';
             heartContainer.classList.add('show');
             
-            // Animation progressive du cœur
             let progress = 0;
             const animationDuration = 1500;
             const startTime = Date.now();
@@ -295,7 +321,6 @@
                 const elapsed = Date.now() - startTime;
                 progress = Math.min(elapsed / animationDuration, 1);
                 
-                // Courbe d'accélération
                 const easeProgress = 1 - Math.pow(1 - progress, 3);
                 
                 drawHeart(easeProgress);
@@ -303,7 +328,6 @@
                 if (progress < 1) {
                     requestAnimationFrame(animate);
                 } else {
-                    // Créer des particules de cœur autour
                     for (let i = 0; i < 15; i++) {
                         setTimeout(() => {
                             const rect = canvas.getBoundingClientRect();
@@ -318,16 +342,10 @@
             animate();
         }
 
-        // Ajouter plusieurs écouteurs d'événements pour une meilleure compatibilité
         button.addEventListener('click', handleButtonClick);
         button.addEventListener('touchstart', handleButtonClick);
 
-        // Ajouter un indicateur visuel de debug (optionnel)
-        button.addEventListener('mouseenter', function() {
-            console.log('Hover détecté');
-        });
-
-        // Créer des particules ambiantes occasionnelles
+        // Particules ambiantes
         setInterval(() => {
             if (heartContainer.classList.contains('show')) {
                 const x = Math.random() * window.innerWidth;
@@ -335,6 +353,66 @@
                 createParticle(x, y);
             }
         }, 2000);
+
+        // ========================
+        // Gestion du code secret
+        // ========================
+        (function() {
+            const secret = document.getElementById('secretCode');
+            const toast = document.getElementById('copyToast');
+
+            function showToast(msg = 'Copié !') {
+                toast.textContent = msg;
+                toast.style.display = 'block';
+                toast.style.opacity = '1';
+                setTimeout(() => {
+                    toast.style.transition = 'opacity 300ms';
+                    toast.style.opacity = '0';
+                }, 900);
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                    toast.style.transition = '';
+                }, 1200);
+            }
+
+            window.addEventListener('keydown', async function(e) {
+                const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+                const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+
+                if (ctrlOrCmd && (e.key === 'a' || e.key === 'A')) {
+                    e.preventDefault();
+                    const text = secret.textContent.trim();
+
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        try {
+                            await navigator.clipboard.writeText(text);
+                            showToast('Code secret copié ✅');
+                        } catch (err) {
+                            fallbackCopy(text);
+                        }
+                    } else {
+                        fallbackCopy(text);
+                    }
+                }
+            });
+
+            function fallbackCopy(text) {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.setAttribute('readonly', '');
+                ta.style.position = 'absolute';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('Code secret copié ✅');
+                } catch (err) {
+                    showToast('Erreur de copie');
+                }
+                document.body.removeChild(ta);
+            }
+        })();
     </script>
 </body>
 </html>
