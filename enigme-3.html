@@ -5,30 +5,96 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vica ❤️</title>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
       min-height: 100vh;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display: flex;
       justify-content: center;
       align-items: center;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    .container { text-align: center; }
+    .container {
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
     #startButton {
+      background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      border: none;
       padding: 20px 50px;
       font-size: 24px;
+      font-weight: bold;
       border-radius: 50px;
-      border: none;
-      background: linear-gradient(45deg, #f093fb, #f5576c);
-      color: #fff;
       cursor: pointer;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+      letter-spacing: 1px;
+      animation: pulse 2s infinite;
+      position: relative;
+      z-index: 100;
+      min-width: 280px;
+      min-height: 70px;
+      display: inline-block;
     }
-    #heartContainer { opacity: 0; transition: opacity 1s ease; }
+    #startButton:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    }
+    #startButton:active {
+      transform: translateY(0px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    #heartContainer {
+      position: relative;
+      opacity: 0;
+      transition: opacity 1s ease;
+      z-index: 50;
+    }
     #heartContainer.show { opacity: 1; }
-
     canvas {
       filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));
+      animation: heartbeat 1.5s ease-in-out infinite;
+      animation-delay: 1.5s;
+    }
+    @keyframes heartbeat {
+      0% { transform: scale(1); }
+      14% { transform: scale(1.1); }
+      28% { transform: scale(1); }
+      42% { transform: scale(1.1); }
+      70% { transform: scale(1); }
+    }
+    .particle {
+      position: fixed;
       pointer-events: none;
+      opacity: 0;
+      animation: float 4s ease-out forwards;
+      z-index: 1;
+    }
+    @keyframes float {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(0);
+      }
+      15% { transform: translateY(-20px) scale(1); }
+      100% {
+        opacity: 0;
+        transform: translateY(-150px) translateX(var(--drift)) scale(0.5);
+      }
+    }
+    .heart-small {
+      color: #ff1744;
+      font-size: 20px;
     }
 
     /* étape décodage */
@@ -119,6 +185,25 @@
       '        #### ',
       '         ## '
     ];
+    const highlightPattern = [
+      '     #              ',
+      '    ##              ',
+      '     #              ',
+      '                    ',
+      '                    ',
+      '                    ',
+      '                    ',
+      '                    ',
+      '                    ',
+      '                    ',
+      '                    ',
+      '                    ',
+      '                    ',
+      '                    ',
+      '                    ',
+      '                    ',
+      '                    '
+    ];
     canvas.width = heartPattern[0].length * pixelSize;
     canvas.height = heartPattern.length * pixelSize;
 
@@ -128,14 +213,23 @@
     }
     function drawHeart(progress) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const total = getTotalPixels();
-      let shown = Math.floor(progress * total);
-      let drawn = 0;
+      const pixelsToShow = Math.floor(progress * getTotalPixels());
+      let pixelsDrawn = 0;
       for (let y = 0; y < heartPattern.length; y++) {
         for (let x = 0; x < heartPattern[y].length; x++) {
-          if (heartPattern[y][x] === "#" && drawn < shown) {
-            drawPixel(x, y, "#DC143C");
-            drawn++;
+          if (heartPattern[y][x] === '#' && pixelsDrawn < pixelsToShow) {
+            drawPixel(x, y, '#DC143C');
+            // contour
+            if (isEdge(x, y)) {
+              ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+              ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+            }
+            // reflet blanc
+            if (highlightPattern[y] && highlightPattern[y][x] === '#') {
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+              ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+            }
+            pixelsDrawn++;
           }
         }
       }
@@ -144,22 +238,57 @@
       return heartPattern.reduce((acc, row) =>
         acc + row.split("").filter(ch => ch === "#").length, 0);
     }
+    function isEdge(x, y) {
+      const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+      for (let [dx, dy] of dirs) {
+        const nx = x + dx, ny = y + dy;
+        if (ny < 0 || ny >= heartPattern.length ||
+            nx < 0 || nx >= heartPattern[ny].length ||
+            heartPattern[ny][nx] !== '#') return true;
+      }
+      return false;
+    }
+    function createParticle(x, y) {
+      const particle = document.createElement('div');
+      particle.className = 'particle heart-small';
+      particle.innerHTML = '❤️';
+      particle.style.left = x + 'px';
+      particle.style.top = y + 'px';
+      particle.style.setProperty('--drift', (Math.random() - 0.5) * 100 + 'px');
+      document.body.appendChild(particle);
+      setTimeout(() => particle.remove(), 4000);
+    }
 
     button.addEventListener("click", () => {
       button.style.display = "none";
       heartContainer.classList.add("show");
-      // animation cœur
-      let start = Date.now();
-      let duration = 1500;
-      function anim() {
-        let t = (Date.now() - start) / duration;
-        if (t > 1) t = 1;
-        drawHeart(1 - Math.pow(1 - t, 3));
-        if (t < 1) requestAnimationFrame(anim);
+
+      // animation progressive du cœur
+      let progress = 0;
+      const duration = 1500;
+      const startTime = Date.now();
+      function animate() {
+        const elapsed = Date.now() - startTime;
+        progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        drawHeart(ease);
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          // particules après le cœur
+          for (let i = 0; i < 15; i++) {
+            setTimeout(() => {
+              const rect = canvas.getBoundingClientRect();
+              const x = rect.left + rect.width/2 + (Math.random() - 0.5) * 200;
+              const y = rect.top + rect.height/2 + (Math.random() - 0.5) * 200;
+              createParticle(x, y);
+            }, i * 100);
+          }
+          // après l’animation → champ texte
+          setTimeout(() => { decodeStep.style.display = "block"; }, 1000);
+        }
       }
-      anim();
-      // après animation → afficher l'étape décodage
-      setTimeout(() => { decodeStep.style.display = "block"; }, duration);
+      animate();
     });
 
     decodeInput.addEventListener("input", () => {
@@ -169,7 +298,7 @@
       }
     });
 
-    // Ctrl+A → copie le secret seulement si rebus affiché
+    // Ctrl+A → copie seulement si rebus visible
     window.addEventListener("keydown", async (e) => {
       const isMac = /MAC/i.test(navigator.platform);
       const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
@@ -192,10 +321,19 @@
       setTimeout(() => { toast.style.display = "none"; }, 1000);
     }
 
-    // Normaliser accents/majuscules
     function normalize(str) {
-      return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+      return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase().trim();
     }
+
+    // particules ambiantes
+    setInterval(() => {
+      if (heartContainer.classList.contains('show')) {
+        const x = Math.random() * window.innerWidth;
+        const y = Math.random() * window.innerHeight;
+        createParticle(x, y);
+      }
+    }, 2000);
   </script>
 </body>
 </html>
